@@ -37,7 +37,7 @@
         @endif
         
         <div class="w-50 mx-auto m-5">
-            <form class="form-horizontal w-50 mx-auto" action='calculos' method='post' enctype='multipart/form-data'>
+            <form class="form-horizontal w-50 mx-auto" action='turno/calcular' method='post' enctype='multipart/form-data'>
                 @csrf
                 <div class="form-group">
                     <label class='form-label' for="hora_inicial">Horário inicial</label>
