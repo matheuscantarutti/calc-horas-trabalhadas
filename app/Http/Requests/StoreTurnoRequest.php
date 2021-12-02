@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\Max24Horas;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreTurnoRequest extends FormRequest
@@ -23,16 +24,29 @@ class StoreTurnoRequest extends FormRequest
      */
     public function rules()
     {
+        $max_24horas = new Max24Horas(FormRequest::input()["data_hora_inicial"]);
+        $format = 'Y-m-d\TH:i';
         return [
-            'hora_inicial' => 'required',
-            'hora_final' => 'required'
+            'data_hora_inicial' =>
+                ['required', "date_format:$format"],
+            'data_hora_final' =>
+                ['required', "date_format:$format" ,'after:data_hora_inicial', $max_24horas]
         ];
     }
 
     public function messages(){
+
+        $format_msg = 'Formato incorreto. Modelo = Y-m-d H:i:s ';
+        $required_msg = "é de preenchimento obrigatório.";
+
         return [
-            'hora_inicial.required' => "Campo Horário inicial é de preenchimento obrigatório.",
-            'hora_final.required' => "Campo Horário final é de preenchimento obrigatório.",
+            'data_hora_inicial.required' => "Horário inicial $required_msg",
+            'data_hora_inicial.date_format' => $format_msg ,
+            'data_hora_final.date_format' => $format_msg,
+            'data_hora_final.required' => "Horário final $required_msg",
+            'data_hora_final.after' => 'Horário final não pode ser anterior ao inicial.'
+
+
 
         ];
     }
