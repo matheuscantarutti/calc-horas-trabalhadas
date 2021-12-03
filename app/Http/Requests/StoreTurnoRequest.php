@@ -24,6 +24,7 @@ class StoreTurnoRequest extends FormRequest
      */
     public function rules()
     {
+        dd(FormRequest::parent());
         $max_24horas = new Max24Horas(FormRequest::input()["data_hora_inicial"]);
         $format = 'Y-m-d\TH:i';
         return [
