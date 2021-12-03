@@ -15,6 +15,11 @@ use App\Http\Controllers\TurnoController;
 */
 
 
-Route::view('/', 'horas');
+
+Route::get("/", [TurnoController::class, 'create']);
+Route::get('/', [TurnoController::class, 'index'])->name("resultado");
 Route::post("turno/calcular", [TurnoController::class, 'store']);
+
+
+
 

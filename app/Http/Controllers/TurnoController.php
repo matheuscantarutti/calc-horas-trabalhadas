@@ -7,6 +7,7 @@ use App\Http\Requests\StoreTurnoRequest;
 use Illuminate\Http\Response;
 use App\Actions\TurnoAction;
 use DateTime;
+use App\Models\Turno;
 
 class TurnoController extends Controller
 {
@@ -18,6 +19,7 @@ class TurnoController extends Controller
     public function index()
     {
 
+        return view("horas");
     }
 
     /**
@@ -28,6 +30,7 @@ class TurnoController extends Controller
     public function create()
     {
 
+        return view('horas');
     }
 
     /**
@@ -43,7 +46,13 @@ class TurnoController extends Controller
             new DateTime($request->data_hora_final)
         );
 
-        return view('horas', ['data' => $turno_info]);
+        $turno_data = [...$turno_info, ...$request->all()];
+
+        $turno = new Turno($turno_data);
+
+        $turno->save();
+
+        return redirect()->route("resultado")->with('data', $turno_info);
     }
 
     /**

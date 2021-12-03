@@ -38,16 +38,17 @@
     @endif
 
 
-        @if(isset($data))
+        @if(session('data'))
             <div class="alert alert-success text-center w-50 mx-auto">
+
                 <h5>Turno registrado com sucesso!</h5>
-                <p>Horas diurnas: {{$data['horas_diurnas']}} </p>
-                <p>Horas noturnas: {{$data['horas_noturnas']}} </p>
+                <p>Horas diurnas: {{session('data')['horas_diurnas']}} </p>
+                <p>Horas noturnas: {{session('data')['horas_noturnas']}} </p>
             </div>
         @endif
     <h1 class='text-center'>Calculadora de Horas Trabalhadas</h1>
     <div class="w-50 mx-auto m-5">
-        <form class="form-horizontal w-50 mx-auto" action='turno/calcular' method='post' enctype='multipart/form-data'>
+        <form class="form-horizontal w-50 mx-auto" action='/turno/calcular' method='post' enctype='multipart/form-data'>
             @csrf
             <div class="form-group m-2">
                 <label class='form-label mt-1' for="data_hora_inicial">Horário inicial</label>

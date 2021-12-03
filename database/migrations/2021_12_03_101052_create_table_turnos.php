@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTurnosTable extends Migration
+class CreateTableTurnos extends Migration
 {
     /**
      * Run the migrations.
@@ -16,10 +16,10 @@ class CreateTurnosTable extends Migration
         Schema::create('turnos', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->time("hora_inicio");
-            $table->time("hora_fim");
-            $table->smallInteger("qtd_horas_diurnas");
-            $table->smallInteger("qtd_horas_noturnas");
+            $table->string('horas_diurnas');
+            $table->string("horas_noturnas");
+            $table->string("data_hora_inicial");
+            $table->string("data_hora_final");
         });
     }
 
@@ -30,6 +30,6 @@ class CreateTurnosTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('turnos');
+        Schema::dropIfExists('table_turnos');
     }
 }
