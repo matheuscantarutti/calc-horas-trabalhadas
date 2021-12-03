@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreTurnoRequest;
 use Illuminate\Http\Response;
+use App\Actions\TurnoAction;
 use DateTime;
 
 class TurnoController extends Controller
@@ -37,15 +38,12 @@ class TurnoController extends Controller
      */
     public function store(StoreTurnoRequest $request)
     {
-        dd($request->input()['data_hora_inicial']);
-        $hora_inicial = new DateTime($request->input()['data_hora_inicial']);
-        $hora_final = new DateTime($request->input()['data_hora_final']);
-        $limite_diurno = new DateTime("0000-00-00 22:00:00");
-        $limite_noturno = new DateTime("0000-00-00 05:00:00");
-        $total_diurno = "00:00:00";
-        $total_noturno = "00:00:00";
+        $turno_info = TurnoAction::calculaHorasTrabalhadas(
+            new DateTime($request->data_hora_inicial),
+            new DateTime($request->data_hora_final)
+        );
 
-        dd($hora_inicial);
+        return view('home', [...$turno_info]);
     }
 
     /**

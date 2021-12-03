@@ -36,7 +36,7 @@ class StoreTurnoRequest extends FormRequest
 
     public function messages(){
 
-        $format_msg = 'Formato incorreto. Modelo = Y-m-d H:i:s ';
+        $format_msg = 'Formato incorreto. Modelo = Y-m-d\TH:i';
         $required_msg = "é de preenchimento obrigatório.";
 
         return [
@@ -44,9 +44,7 @@ class StoreTurnoRequest extends FormRequest
             'data_hora_inicial.date_format' => $format_msg ,
             'data_hora_final.date_format' => $format_msg,
             'data_hora_final.required' => "Horário final $required_msg",
-            'data_hora_final.after' => 'Horário final não pode ser anterior ao inicial.'
-
-
+            'data_hora_final.after' => 'Horário final não pode ser igual ou anterior ao inicial.'
 
         ];
     }
