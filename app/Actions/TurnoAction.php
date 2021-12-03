@@ -3,35 +3,58 @@
 namespace App\Actions;
 
 use DateTime;
-use App\Models\Turno;
+use DateInterval;
+use App\Helper\TurnoActionHelper;
 
 class TurnoAction
 {
 
-    public static function calculaHorasTrabalhadas(DateTime $hora_inicial, DateTime $hora_final){
+    public static function returnFormat()
+    {
+        return "%H:%I:%S";
+    }
 
-        $return_format = "%H:%I:%S";
-        $vazio = "00:00:00";
-        $dia_inicial = $hora_inicial->format('Y-m-d');
-        $dia_final = $hora_final->format('Y-m-d');
-        $limite_diurno = new DateTime("$dia_inicial 22:00:00");
-        $limite_noturno = new DateTime("$dia_final 05:00:00");
+    public static function returnVazio()
+    {
+        return "00:00:00";
+    }
 
-        $interval = $hora_inicial->diff($hora_final);
+    public static function calculaHorasTrabalhadas(DateTime $hora_inicial, DateTime $hora_final)
+    {
+        $helper = new TurnoActionHelper($hora_inicial, $hora_final);
 
-        if($hora_inicial <  $limite_diurno && $hora_inicial > $limite_noturno) {
-                if($hora_final < $limite_diurno ){
-                    return array("horas_diurnas" =>  $interval->format($return_format), "horas_noturnas" => $vazio);
-                }
+        $entrada_diurna = self::isEntradaDiurna($helper, $hora_inicial);
+        $saida_diurna = self::isSaidaDiurna($helper, $hora_final);
+        $saida_noturna = self::isSaidaNoturna($helper, $hora_final);
+        $tipo_turno = 'simples';
 
-            return self::calcTurnoDiurnoNoturno($hora_inicial, $limite_diurno, $hora_final);
+
+        if ($entrada_diurna) {
+
+            if ($helper->getDiaInicial() !== $helper->getDiaFinal()) {
+                $helper->trocaDiaReferencia();
+                $tipo_turno = 'duplo';
+                $saida_diurna = self::isSaidaDiurna($helper, $hora_final);
+            }
+
+            if ($saida_diurna) {
+                return self::getTurnoDiurno($helper, $tipo_turno);
+            }
+
+            return self::calcTurnoDiurnoNoturno($hora_inicial, $helper->getLimiteDiurno(), $hora_final);
         }
 
-        if($hora_final <  $limite_noturno || $hora_final >= $limite_diurno){
-            return array("horas_diurnas" =>  $vazio, "horas_noturnas" => $interval->format($return_format));
+        if ($helper->getDiaInicial() !== $helper->getDiaFinal()) {
+            $helper->trocaDiaReferencia();
+            $tipo_turno = 'duplo';
+            $saida_noturna = self::isSaidaNoturna($helper, $hora_final);
         }
 
-        return self::calcTurnoDiurnoNoturno($hora_inicial, $limite_noturno, $hora_final);
+        if ($saida_noturna) {
+            return self::getTurnoNoturno($helper, $tipo_turno);
+        }
+
+        return self::calcTurnoDiurnoNoturno($hora_inicial, $helper->getLimiteNoturno(), $hora_final);
 
     }
 
@@ -46,6 +69,104 @@ class TurnoAction
         $interval_inicial = $hora_inicial->diff($limite);
         $interval_final = $limite->diff($hora_final);
 
-        return array("horas_dirunas" => $interval_inicial, "horas_noturnas" => $interval_final);
+        return array("horas_diurnas" => $interval_inicial->format(self::returnFormat()),
+            "horas_noturnas" => $interval_final->format(self::returnFormat()));
     }
+
+    /**
+     * @param TurnoActionHelper $helper
+     * @param DateTime $hora_inicial
+     * @return bool
+     */
+    public static function isEntradaDiurna(TurnoActionHelper $helper, DateTime $hora_inicial): bool
+    {
+        return $hora_inicial < $helper->getLimiteDiurno() && $hora_inicial > $helper->getLimiteNoturno() ? true : false;
+    }
+
+    /**
+     * @param TurnoActionHelper $helper
+     * @param DateTime $hora_final
+     * @return bool
+     */
+    public static function isSaidaDiurna(TurnoActionHelper $helper, DateTime $hora_final): bool
+    {
+        return $hora_final < $helper->getLimiteDiurno() && $hora_final > $helper->getLimiteNoturno() ? true : false;
+    }
+
+    /**
+     * @param TurnoActionHelper $helper
+     * @param DateTime $hora_final
+     * @return bool
+     */
+    public static function isSaidaNoturna(TurnoActionHelper $helper, DateTime $hora_final): bool
+    {
+        return $hora_final < $helper->getLimiteNoturno() || $hora_final >= $helper->getLimiteDiurno();
+    }
+
+    /**
+     * @param $helper
+     * @return array
+     */
+    public static function calcTurnoDiurnoSimples($helper): array
+    {
+        return array("horas_diurnas" => $helper->getIntervalo()->format(self::returnFormat()),
+            "horas_noturnas" => self::returnVazio()
+        );
+    }
+
+    /**
+     * @param TurnoActionHelper $helper
+     * @return array
+     * @throws \Exception
+     */
+    public static function calcTurnoDiurnoDuplo(DateInterval $intervalo): array
+    {
+        $horas_noturnas = new DateInterval("PT7H");
+        $data_aux = new DateTime($intervalo->format(self::returnFormat()));
+        $horas_diurnas = $data_aux->sub($horas_noturnas);
+
+        return array(
+            "horas_diurnas" => $horas_diurnas->format('H:i:s'),
+            "horas_noturnas" => $horas_noturnas->format(self::returnFormat())
+        );
+    }
+
+    private static function getTurnoNoturno(TurnoActionHelper $helper, string $tipo_turno)
+    {
+        return $tipo_turno == 'simples' ? self::calcTurnoNoturnoSimples($helper) : self::calcTurnoNoturnoDuplo($helper);
+    }
+
+    /**
+     * @param TurnoActionHelper $helper
+     * @return array
+     * @throws \Exception
+     */
+    private static function calcTurnoNoturnoDuplo(TurnoActionHelper $helper): array
+    {
+        $horas_diurnas = new DateInterval("PT17H");
+        $data_aux = new DateTime($helper->getIntervalo()->format(self::returnFormat()));
+        $horas_noturnas = $data_aux->sub($horas_diurnas);
+
+        dd($horas_noturnas);
+
+        return array("horas_diurnas" => $horas_diurnas->format(self::returnFormat()),
+            "horas_noturnas" => $horas_noturnas->format('H:i:s')
+        );
+    }
+
+    /**
+     * @param $helper
+     * @return array
+     */
+    private static function calcTurnoNoturnoSimples($helper): array
+    {
+        return array("horas_diurnas" => self::returnVazio(),
+            "horas_noturnas" => $helper->getIntervalo()->format(self::returnFormat()));
+    }
+
+    private static function getTurnoDiurno(TurnoActionHelper $helper, string $tipo_turno)
+    {
+        return $tipo_turno == 'simples' ? self::calcTurnoDiurnoSimples($helper) : self::calcTurnoDiurnoDuplo($helper->getIntervalo());
+    }
+
 }

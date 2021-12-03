@@ -17,7 +17,7 @@ class TurnoController extends Controller
      */
     public function index()
     {
-        //
+
     }
 
     /**
@@ -43,7 +43,7 @@ class TurnoController extends Controller
             new DateTime($request->data_hora_final)
         );
 
-        return view('home', [...$turno_info]);
+        return view('horas', ['data' => $turno_info]);
     }
 
     /**
