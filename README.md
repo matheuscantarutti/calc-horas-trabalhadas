@@ -10,5 +10,12 @@
 
 ## Execução
 
-Para executar e necessário instalar todas as ferramentas da lista.
-Cadas uma delas direciona para um link de documentação ou instruções.
+Para executar o projeto localmente, é necessário instalar todas as ferramentas da lista.
+Cada uma delas direciona para um link de documentação ou instruções.
+
+Dicas:
+
+- Configurar a variável de ambiente do PHP.
+- Seguir a ordem da lista.
+- Executar os comando no powershell com permissão de administrador.  
+
